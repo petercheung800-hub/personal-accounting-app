@@ -64,7 +64,7 @@ export function formatCurrency(amount, currency, locale = (typeof navigator !== 
 
 // 获取汇率：以 base 为基准，返回其他币种相对 base 的乘数
 export async function fetchRates(base = 'CNY') {
-  const url = `https://api.exchangerate.host/latest?base=${base}&symbols=USD,EUR,GBP,JPY,CNY`;
+  const url = `/api/rates?base=${base}`;
   try {
     const res = await fetch(url);
     const data = await res.json();
