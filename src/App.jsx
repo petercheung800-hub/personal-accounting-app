@@ -62,7 +62,7 @@ function App() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [currency, setCurrency] = useState('CNY');
   const [rates, setRates] = useState({ CNY: 1 });
-  const [locale, setLocale] = useState(typeof navigator !== 'undefined' ? navigator.language : 'zh-CN');
+  const [locale, _setLocale] = useState(typeof navigator !== 'undefined' ? navigator.language : 'zh-CN');
   const [status, setStatus] = useState(null); // { type: 'success'|'error'|'info', message: string }
   const [confirmDelete, setConfirmDelete] = useState({ open: false, item: null });
   // 货币徽标显示偏好：'name' | 'symbol' | 'code'
@@ -136,9 +136,7 @@ function App() {
     return map[category] || '💸';
   };
 
-  const handleEditClick = (expense) => {
-    setEditingExpense(expense);
-  };
+  // 使用内联方式设置编辑项，移除未使用的包装函数以满足 ESLint
 
   const handleDeleteExpense = async (id) => {
     const ok = await deleteExpense(id);

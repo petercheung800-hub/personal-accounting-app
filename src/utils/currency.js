@@ -56,7 +56,7 @@ export function getDefaultCurrency() {
 export function formatCurrency(amount, currency, locale = (typeof navigator !== 'undefined' ? navigator.language : 'zh-CN')) {
   try {
     return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(amount);
-  } catch (e) {
+  } catch (_e) {
     const sym = getSymbol(currency);
     return `${sym} ${Number(amount).toFixed(2)}`;
   }
@@ -71,7 +71,7 @@ export async function fetchRates(base = 'CNY') {
     if (data && data.rates) {
       return data.rates;
     }
-  } catch (e) {
+  } catch (_e) {
     // ignore
   }
   // 回退固定汇率（仅用于演示；非实时）
