@@ -87,6 +87,14 @@ function App() {
     initRates();
   }, []);
 
+  const formatRate = (value) => {
+    try {
+      return Number(value).toLocaleString(locale, { maximumFractionDigits: 4 });
+    } catch (_e) {
+      return Number(value).toFixed(4);
+    }
+  };
+
   const notifyStatus = (message, type = 'info', timeout = 3000) => {
     setStatus({ message, type });
     if (timeout) {
@@ -181,6 +189,14 @@ function App() {
         <div className="header-tools">
           <CurrencySelector value={currency} onChange={handleCurrencyChange} />
         </div>
+        {currency !== 'CNY' && rates && rates[currency] && (
+          <div className="exchange-rate-pill" aria-live="polite" title="最新汇率">
+            <span>汇率：</span>
+            <span>1 CNY ≈ {formatRate(rates[currency])} {currency}</span>
+            <span className="exchange-rate-divider">·</span>
+            <span>1 {currency} ≈ {formatRate(1 / rates[currency])} CNY</span>
+          </div>
+        )}
         {status && (
           <div className={`status-bar ${status.type}`} role="status" aria-live="polite">
             {status.message}

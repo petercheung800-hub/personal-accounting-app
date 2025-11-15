@@ -137,6 +137,22 @@
   justify-content: center;
 }
 
+.exchange-rate-pill {
+  margin: var(--space-3) auto 0;
+  display: inline-flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255,255,255,0.25);
+  background: linear-gradient(180deg, rgba(255,255,255,0.35), rgba(255,255,255,0.18));
+  color: rgba(0,0,0,0.85);
+  box-shadow: var(--shadow-md);
+  font-weight: 600;
+}
+
+.exchange-rate-divider { opacity: 0.6; }
+
 .currency-selector {
   display: inline-flex;
   align-items: center;
