@@ -1,3 +1,9 @@
+# Personal Accounting App
+
+[![CI](https://github.com/petercheung800-hub/personal-accounting-app/actions/workflows/ci.yml/badge.svg)](https://github.com/petercheung800-hub/personal-accounting-app/actions/workflows/ci.yml)
+
+一个基于 React + Vite 的个人记账应用。
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
