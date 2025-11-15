@@ -34,4 +34,29 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // Node server override: enable Node globals (process, __dirname, etc.)
+    files: ['server/**/*.js'],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: {
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^[A-Z_]',
+          argsIgnorePattern: '^[A-Z_]',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^[A-Z_]',
+        },
+      ],
+    },
+  },
 ])

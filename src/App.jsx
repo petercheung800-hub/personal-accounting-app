@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { openDB } from 'idb';
 import ExpenseForm from './components/ExpenseForm';
 import Report from './components/Report';
 import CurrencySelector from './components/CurrencySelector';
@@ -7,11 +6,6 @@ import ConfirmDialog from './components/ConfirmDialog';
 import { getDefaultCurrency, fetchRates, getCurrencyLabel } from './utils/currency';
 import './App.css';
 
-const dbPromise = openDB('expense-db', 1, {
-  upgrade(db) {
-    db.createObjectStore('expenses', { keyPath: 'id', autoIncrement: true });
-  },
-});
 
 const addExpense = async (expense) => {
   try {
