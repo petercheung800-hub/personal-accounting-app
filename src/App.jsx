@@ -15,9 +15,12 @@ const dbPromise = openDB('expense-db', 1, {
 
 const addExpense = async (expense) => {
   try {
-    const db = await dbPromise;
-    await db.add('expenses', expense);
-    return true;
+    const res = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expense),
+    });
+    return res.ok;
   } catch (e) {
     console.error('Add expense failed:', e);
     return false;
@@ -26,8 +29,9 @@ const addExpense = async (expense) => {
 
 const getExpenses = async () => {
   try {
-    const db = await dbPromise;
-    return await db.getAll('expenses');
+    const res = await fetch('/api/expenses');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return await res.json();
   } catch (e) {
     console.error('Get expenses failed:', e);
     return [];
@@ -36,9 +40,8 @@ const getExpenses = async () => {
 
 const deleteExpense = async (id) => {
   try {
-    const db = await dbPromise;
-    await db.delete('expenses', id);
-    return true;
+    const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+    return res.ok;
   } catch (e) {
     console.error('Delete expense failed:', e);
     return false;
@@ -48,9 +51,12 @@ const deleteExpense = async (id) => {
 const updateExpense = async (expense) => {
   try {
     if (!expense || typeof expense.id === 'undefined') throw new Error('Missing id');
-    const db = await dbPromise;
-    await db.put('expenses', expense);
-    return true;
+    const res = await fetch(`/api/expenses/${expense.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(expense),
+    });
+    return res.ok;
   } catch (e) {
     console.error('Update expense failed:', e);
     return false;
