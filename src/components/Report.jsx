@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, PieController, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, LineController, BarController } from 'chart.js';
+import { getSymbol } from '../utils/currency'; // 添加货币符号导入
 
 ChartJS.register(
   ArcElement, 
@@ -16,16 +17,22 @@ ChartJS.register(
   BarController
 );
 
-const Report = ({ expenses }) => {
+const Report = ({ expenses, currency = 'CNY' }) => { // 添加 currency 属性默认值
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
   const [activeChart, setActiveChart] = useState('pie'); // 'pie', 'line', or 'bar'
+  const symbol = getSymbol(currency); // 获取货币符号
 
   // 计算统计数据
   const totalExpense = expenses.reduce((sum, expense) => sum + Number(expense.amount), 0);
   const averageDailyExpense = expenses.length > 0 ? totalExpense / expenses.length : 0;
   const maxExpense = expenses.length > 0 ? Math.max(...expenses.map(e => Number(e.amount))) : 0;
   const minExpense = expenses.length > 0 ? Math.min(...expenses.map(e => Number(e.amount))) : 0;
+
+  // 格式化金额显示，添加货币符号
+  const formatAmount = (amount) => {
+    return symbol ? `${symbol} ${Number(amount).toFixed(2)}` : Number(amount).toFixed(2);
+  };
 
   // 按日期分组计算每日支出总额
   const getDailyExpenses = () => {
@@ -131,7 +138,7 @@ const Report = ({ expenses }) => {
                   label: (ctx) => {
                     const label = ctx.label || '';
                     const value = ctx.raw;
-                    return `${label}: ${value}`;
+                    return `${label}: ${formatAmount(value)}`; // 添加货币符号
                   },
                 },
               },
@@ -166,10 +173,24 @@ const Report = ({ expenses }) => {
                 display: true,
                 text: '每日支出趋势',
               },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const label = ctx.dataset.label || '';
+                    const value = ctx.raw;
+                    return `${label}: ${formatAmount(value)}`; // 添加货币符号
+                  },
+                },
+              },
             },
             scales: {
               y: {
                 beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return formatAmount(value); // 为Y轴添加货币符号
+                  }
+                }
               }
             }
           },
@@ -201,10 +222,24 @@ const Report = ({ expenses }) => {
                 display: true,
                 text: '分类支出柱状图',
               },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const label = ctx.dataset.label || '';
+                    const value = ctx.raw;
+                    return `${label}: ${formatAmount(value)}`; // 添加货币符号
+                  },
+                },
+              },
             },
             scales: {
               y: {
                 beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return formatAmount(value); // 为Y轴添加货币符号
+                  }
+                }
               }
             }
           },
@@ -221,7 +256,7 @@ const Report = ({ expenses }) => {
         chartInstance.current = null;
       }
     };
-  }, [expenses, activeChart]); // 依赖 expenses 和 activeChart
+  }, [expenses, activeChart, symbol]); // 添加 symbol 到依赖数组
 
   return (
     <div className="report-container animate-fade-in-up">
@@ -235,7 +270,7 @@ const Report = ({ expenses }) => {
           <div className="card-icon">💰</div>
           <div className="card-content">
             <h4>总支出</h4>
-            <p className="card-value">{String(totalExpense)}</p>
+            <p className="card-value">{formatAmount(totalExpense)}</p>
           </div>
         </div>
         
@@ -243,7 +278,7 @@ const Report = ({ expenses }) => {
           <div className="card-icon">📊</div>
           <div className="card-content">
             <h4>日均支出</h4>
-            <p className="card-value">{String(averageDailyExpense)}</p>
+            <p className="card-value">{formatAmount(averageDailyExpense)}</p>
           </div>
         </div>
         
@@ -251,7 +286,7 @@ const Report = ({ expenses }) => {
           <div className="card-icon">📈</div>
           <div className="card-content">
             <h4>最大支出</h4>
-            <p className="card-value">{String(maxExpense)}</p>
+            <p className="card-value">{formatAmount(maxExpense)}</p>
           </div>
         </div>
         
@@ -259,7 +294,7 @@ const Report = ({ expenses }) => {
           <div className="card-icon">📉</div>
           <div className="card-content">
             <h4>最小支出</h4>
-            <p className="card-value">{String(minExpense)}</p>
+            <p className="card-value">{formatAmount(minExpense)}</p>
           </div>
         </div>
       </div>

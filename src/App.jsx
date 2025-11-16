@@ -65,6 +65,7 @@ function App() {
   const [locale, _setLocale] = useState(typeof navigator !== 'undefined' ? navigator.language : 'zh-CN');
   const [status, setStatus] = useState(null); // { type: 'success'|'error'|'info', message: string }
   const [confirmDelete, setConfirmDelete] = useState({ open: false, item: null });
+  const [viewMode, setViewMode] = useState('card'); // 'card', 'list', or 'table'
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -185,6 +186,18 @@ function App() {
     return symbol ? `${symbol} ${numStr}` : numStr;
   };
 
+  // 按日期分组消费记录
+  const groupExpensesByDate = (expenses) => {
+    return expenses.reduce((groups, expense) => {
+      const date = expense.date;
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(expense);
+      return groups;
+    }, {});
+  };
+
   return (
     <div className="App">
       <header className="app-header animate-fade-in-up">
@@ -217,7 +230,33 @@ function App() {
       </main>
       
       <div className="expense-section">
-        <h2 className="section-title animate-float">📋 消费记录</h2>
+        <div className="expense-section-header">
+          <h2 className="section-title animate-float">📋 消费记录</h2>
+          <div className="view-mode-selector">
+            <button 
+              className={`view-mode-btn ${viewMode === 'card' ? 'active' : ''}`}
+              onClick={() => setViewMode('card')}
+              title="卡片视图"
+            >
+              🎴
+            </button>
+            <button 
+              className={`view-mode-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="列表视图"
+            >
+              📋
+            </button>
+            <button 
+              className={`view-mode-btn ${viewMode === 'table' ? 'active' : ''}`}
+              onClick={() => setViewMode('table')}
+              title="表格视图"
+            >
+              📊
+            </button>
+          </div>
+        </div>
+        
         {expenses.length === 0 ? (
           <div className="empty-state animate-fade-in-up" style={{animationDelay: '0.3s'}}>
             <svg className="animate-pulse" width="80" height="80" viewBox="0 0 24 24" fill="none">
@@ -228,7 +267,8 @@ function App() {
             <p className="empty-title">暂无消费记录</p>
             <p className="empty-subtitle">添加您的第一笔消费记录开始智能记账吧！</p>
           </div>
-        ) : (
+        ) : viewMode === 'card' ? (
+          // 卡片视图
           <div className="expense-grid">
             {expenses.map((expense, index) => (
               <div key={expense.id} className="expense-card animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
@@ -251,6 +291,69 @@ function App() {
                 </div>
               </div>
             ))}
+          </div>
+        ) : viewMode === 'list' ? (
+          // 列表视图
+          <div className="expense-list">
+            {Object.entries(groupExpensesByDate(expenses)).map(([date, dateExpenses]) => (
+              <div key={date} className="expense-date-group">
+                <h3 className="expense-date-header">{date}</h3>
+                {dateExpenses.map((expense) => (
+                  <div key={expense.id} className="expense-list-item">
+                    <div className="expense-list-main">
+                      <span className="expense-list-amount">{displayAmount(expense)}</span>
+                      <span className="expense-list-category">{getCategoryEmoji(expense.category)} {expense.category}</span>
+                    </div>
+                    <div className="expense-list-details">
+                      {expense.notes && <span className="expense-list-notes">📝 {expense.notes}</span>}
+                      <div className="expense-list-actions">
+                        <button className="edit-btn small" onClick={() => setEditingExpense(expense)}>
+                          ✏️
+                        </button>
+                        <button className="delete-btn small" onClick={() => requestDeleteExpense(expense)}>
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          // 表格视图
+          <div className="expense-table-container">
+            <table className="expense-table">
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>类别</th>
+                  <th>金额</th>
+                  <th>备注</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((expense) => (
+                  <tr key={expense.id}>
+                    <td>{expense.date}</td>
+                    <td>{getCategoryEmoji(expense.category)} {expense.category}</td>
+                    <td className="expense-amount">{displayAmount(expense)}</td>
+                    <td>{expense.notes || '-'}</td>
+                    <td>
+                      <div className="table-actions">
+                        <button className="edit-btn small" onClick={() => setEditingExpense(expense)}>
+                          ✏️
+                        </button>
+                        <button className="delete-btn small" onClick={() => requestDeleteExpense(expense)}>
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
