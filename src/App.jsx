@@ -3,7 +3,7 @@ import ExpenseForm from './components/ExpenseForm';
 import Report from './components/Report';
 import CurrencySelector from './components/CurrencySelector';
 import ConfirmDialog from './components/ConfirmDialog';
-import { getDefaultCurrency, fetchRates, getCurrencyLabel } from './utils/currency';
+import { getDefaultCurrency, fetchRates, getCurrencyLabel, getSymbol } from './utils/currency';
 import './App.css';
 
 
@@ -178,8 +178,22 @@ function App() {
     localStorage.setItem('preferredCurrency', code);
   };
 
-  // 不进行汇率换算或格式化，展示原始输入字符串（若无则回退为数字字符串）
-  const displayAmount = (expense) => expense?.amountText ?? String(expense?.amount ?? '');
+  // 展示金额：在数字前加记录的货币符号（若有）；
+  // 若用户原始输入已包含符号或代码，则不重复添加。
+  const displayAmount = (expense) => {
+    const symbol = getSymbol(expense?.currency || currency);
+    const raw = (expense?.amountText ?? '').trim();
+    if (raw) {
+      const hasPrefixSymbol = symbol && raw.startsWith(symbol);
+      const hasPrefixCode = (expense?.currency && raw.toUpperCase().startsWith(String(expense.currency)));
+      const hasGenericSymbol = /^[€$£¥]/.test(raw);
+      return (hasPrefixSymbol || hasPrefixCode || hasGenericSymbol)
+        ? raw
+        : (symbol ? `${symbol} ${raw}` : raw);
+    }
+    const numStr = String(expense?.amount ?? '');
+    return symbol ? `${symbol} ${numStr}` : numStr;
+  };
 
   return (
     <div className="App">
@@ -189,14 +203,6 @@ function App() {
         <div className="header-tools">
           <CurrencySelector value={currency} onChange={handleCurrencyChange} />
         </div>
-        {currency !== 'CNY' && rates && rates[currency] && (
-          <div className="exchange-rate-pill" aria-live="polite" title="最新汇率">
-            <span>汇率：</span>
-            <span>1 CNY ≈ {formatRate(rates[currency])} {currency}</span>
-            <span className="exchange-rate-divider">·</span>
-            <span>1 {currency} ≈ {formatRate(1 / rates[currency])} CNY</span>
-          </div>
-        )}
         {status && (
           <div className={`status-bar ${status.type}`} role="status" aria-live="polite">
             {status.message}
@@ -242,12 +248,7 @@ function App() {
                   <span className="expense-category">{getCategoryEmoji(expense.category)} {expense.category}</span>
                 </div>
                 <div className="expense-body">
-                  <p className="expense-date">📅 {expense.date}
-                    {/* 记录的货币类型徽标移动到日期旁，旧数据无则回退为当前选择货币 */}
-                    <span className="expense-currency" title="记录货币">
-                      {getCurrencyLabel(expense.currency || currency, currencyLabelMode)}
-                    </span>
-                  </p>
+                  <p className="expense-date">📅 {expense.date}</p>
                   {expense.notes && <p className="expense-notes">📝 {expense.notes}</p>}
                 </div>
                 <div className="expense-actions">
