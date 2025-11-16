@@ -3,7 +3,7 @@ import ExpenseForm from './components/ExpenseForm';
 import Report from './components/Report';
 import CurrencySelector from './components/CurrencySelector';
 import ConfirmDialog from './components/ConfirmDialog';
-import { getDefaultCurrency, fetchRates, getCurrencyLabel, getSymbol } from './utils/currency';
+import { getDefaultCurrency, fetchRates, getSymbol } from './utils/currency';
 import './App.css';
 
 
@@ -65,8 +65,6 @@ function App() {
   const [locale, _setLocale] = useState(typeof navigator !== 'undefined' ? navigator.language : 'zh-CN');
   const [status, setStatus] = useState(null); // { type: 'success'|'error'|'info', message: string }
   const [confirmDelete, setConfirmDelete] = useState({ open: false, item: null });
-  // 货币徽标显示偏好：'name' | 'symbol' | 'code'
-  const [currencyLabelMode] = useState('name');
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -86,14 +84,6 @@ function App() {
     initCurrency();
     initRates();
   }, []);
-
-  const formatRate = (value) => {
-    try {
-      return Number(value).toLocaleString(locale, { maximumFractionDigits: 4 });
-    } catch (_e) {
-      return Number(value).toFixed(4);
-    }
-  };
 
   const notifyStatus = (message, type = 'info', timeout = 3000) => {
     setStatus({ message, type });
